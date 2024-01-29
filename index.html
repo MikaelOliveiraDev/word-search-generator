@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title></title>
+		<style>
+			canvas {
+				/*
+				width: 100px;
+				height: 100px;*/
+				border: 1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Word Search generator</h1>
+		<form>
+			<textarea name="text" id="text" rows="8" cols="40"></textarea>
+			<button id="generate" type="button">generate</button>
+		</form>
+		<canvas width="100" height="100"></canvas>
+		
+		<div id="output"></div>
+		
+		<script src="script.js"></script>
+	</body>
+</html>
