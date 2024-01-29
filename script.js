@@ -31,51 +31,80 @@ function configureBoard() {
 }
 function generate() {
   configureBoard();
-  
-  let arr = ["casa", "gato", "tapete"]
-  for(let word of arr) 
-    putWordOnBoard(word)
-    
+
+  let arr = ["casa", "gato", "tapete"];
+  for (let word of arr) putWordOnBoard(word);
+
   updateCanvas(board);
 }
 function putWordOnBoard(word) {
-  let positionStyle = [
-    "vertical",
-    "horizontal",
-    "diagonal-up",
-    "diagonal-down",
-  ][Math.floor(Math.random() * 4)];
-  let positionX;
-  let positionY;
-  let reverse = Boolean(Math.floor(Math.random() * 2));
-
-  // Position horizontally
-  if (positionStyle == "vertical") positionX = random(boardWidth);
-  else positionX = random(boardWidth - word.length);
-  // Position vertically
-  if (positionStyle == "horizontal") positionY = random(boardWidth);
-  else positionY = random(boardHeight - word.length);
+  let taskFailed;
+  let taskAttempts = 0;
+  let maxAttempts = 10;
   
-  // Generate each letter and put in the board
-  for (let i in word) {
-    i = Number(i);
-    let letter = word[i];
-    let x = positionX;
-    let y = positionY;
+  // Attempt to put word
+  do {
+    // Update task config
+    taskFailed = false;
+    taskAttempts++;
 
-    if (positionStyle != "vertical") x += i;
-    if (positionStyle != "horizontal") y += i;
+    let positionStyle = [
+      "vertical",
+      "horizontal",
+      "diagonal-up",
+      "diagonal-down",
+    ][Math.floor(Math.random() * 4)];
+    let positionX;
+    let positionY;
+    let reverse = Boolean(Math.floor(Math.random() * 2));
 
-    board[x][y] = {
-      letter: letter,
-      from: word,
-      x: x,
-      y: y,
-    };
-  }
+    // Position horizontally
+    if (positionStyle == "vertical") positionX = random(boardWidth);
+    else positionX = random(boardWidth - word.length);
+    // Position vertically
+    if (positionStyle == "horizontal") positionY = random(boardWidth);
+    else positionY = random(boardHeight - word.length);
 
+    // Generate each letter object
+    let letters = []
+    for (let i in word) {
+      i = Number(i);
+      let letter = word[i];
+      let x = positionX;
+      let y = positionY;
+
+      if (positionStyle != "vertical") x += i;
+      if (positionStyle != "horizontal") y += i;
+
+      // Abort if the word overlap another
+      if (board[x][y] && board[x][y].letter != letter) {
+        taskFailed = true;
+        break;
+      }
+
+      let letterObj = {
+        letter: letter,
+        from: word,
+        x: x,
+        y: y,
+      };
+      letters.push(letterObj)
+    }
+    if(taskFailed) continue;
+    
+    // Put letters on board
+    for(let letterObj of letters) {
+	let x = letterObj.x
+	let y = letterObj.y 
+	
+	board[x][y] = letterObj
+    }
+  } while (taskFailed && taskAttempts < maxAttempts);
+  
+  // Gave up putting word ?
+  if(taskFailed && taskAttempts >= maxAttempts)
+    console.log("gave up putting the word \""+ word+"\"")
 }
-
 
 function drawSpaces() {
   ctx.strokeStyle = "black";
@@ -106,16 +135,16 @@ function updateCanvas() {
   for (let w in board) {
     for (let h in board[w]) {
       if (board[w][h]) {
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.font = "20px Arial";
         ctx.fillStyle = "black";
-        
+
         let letterObj = board[w][h];
         let letterString = letterObj.letter;
         let textWidth = ctx.measureText(letterString).width;
-        let x = (letterObj.x * letterSpace) + (letterSpace / 2)// - textWidth;
-        let y = (letterObj.y * letterSpace) + (letterSpace / 2);
+        let x = letterObj.x * letterSpace + letterSpace / 2; // - textWidth;
+        let y = letterObj.y * letterSpace + letterSpace / 2;
 
         ctx.fillText(letterString, x, y);
       }
@@ -123,6 +152,5 @@ function updateCanvas() {
   }
 }
 
-
-configureBoard()
-updateCanvas()
+configureBoard();
+updateCanvas();
