@@ -29,12 +29,14 @@ function configureBoard() {
     }
   }
 }
+
 function generate() {
   configureBoard();
 
-  let arr = ["casa", "gato", "tapete"];
+  let arr = ["CASA", "GATO", "TAPETE"];
   for (let word of arr) putWordOnBoard(word);
-
+  
+  fillSpaces()
   updateCanvas(board);
 }
 function putWordOnBoard(word) {
@@ -104,6 +106,22 @@ function putWordOnBoard(word) {
   // Gave up putting word ?
   if(taskFailed && taskAttempts >= maxAttempts)
     console.log("gave up putting the word \""+ word+"\"")
+}
+function fillSpaces() {
+	const alphabet = ["A", "A" , "B", "C", "Ç", "D", "E", "E", "F", "G", "H", "I", "I", "I", "J", "K", "L", "M", "N", "O", "O", "P", "Q", "R", "S", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+	
+	for(let x in board) {
+		for(let y in board[x]) {
+			if(!board[x][y]) {
+				board[x][y] = {
+					letter: alphabet[random(alphabet.length)],
+					x: x,
+					y:y
+				}
+			}
+		}
+	}
 }
 
 function drawSpaces() {
