@@ -35,15 +35,15 @@ function generate() {
 
   let arr = ["CASA", "GATO", "TAPETE"];
   for (let word of arr) putWordOnBoard(word);
-  
-  fillSpaces()
+
+  //fillSpaces()
   updateCanvas(board);
 }
 function putWordOnBoard(word) {
   let taskFailed;
   let taskAttempts = 0;
   let maxAttempts = 10;
-  
+
   // Attempt to put word
   do {
     // Update task config
@@ -67,8 +67,10 @@ function putWordOnBoard(word) {
     if (positionStyle == "horizontal") positionY = random(boardWidth);
     else positionY = random(boardHeight - word.length);
 
+    if (positionStyle == "diagonal-up") positionY += word.length;
+
     // Generate each letter object
-    let letters = []
+    let letters = [];
     for (let i in word) {
       i = Number(i);
       let letter = word[i];
@@ -76,7 +78,8 @@ function putWordOnBoard(word) {
       let y = positionY;
 
       if (positionStyle != "vertical") x += i;
-      if (positionStyle != "horizontal") y += i;
+      if (positionStyle != "horizontal" && positionStyle != "diagonal-up") y += i;
+      else if (positionStyle == "diagonal-up") y -= i;
 
       // Abort if the word overlap another
       if (board[x][y] && board[x][y].letter != letter) {
@@ -90,38 +93,71 @@ function putWordOnBoard(word) {
         x: x,
         y: y,
       };
-      letters.push(letterObj)
+      letters.push(letterObj);
     }
-    if(taskFailed) continue;
-    
+    if (taskFailed) continue;
+
     // Put letters on board
-    for(let letterObj of letters) {
-	let x = letterObj.x
-	let y = letterObj.y 
-	
-	board[x][y] = letterObj
+    for (let letterObj of letters) {
+      let x = letterObj.x;
+      let y = letterObj.y;
+
+      board[x][y] = letterObj;
     }
   } while (taskFailed && taskAttempts < maxAttempts);
-  
+
   // Gave up putting word ?
-  if(taskFailed && taskAttempts >= maxAttempts)
-    console.log("gave up putting the word \""+ word+"\"")
+  if (taskFailed && taskAttempts >= maxAttempts)
+    console.log('gave up putting the word "' + word + '"');
 }
 function fillSpaces() {
-	const alphabet = ["A", "A" , "B", "C", "Ç", "D", "E", "E", "F", "G", "H", "I", "I", "I", "J", "K", "L", "M", "N", "O", "O", "P", "Q", "R", "S", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+  const alphabet = [
+    "A",
+    "A",
+    "B",
+    "C",
+    "Ç",
+    "D",
+    "E",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "I",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+  ];
 
-	
-	for(let x in board) {
-		for(let y in board[x]) {
-			if(!board[x][y]) {
-				board[x][y] = {
-					letter: alphabet[random(alphabet.length)],
-					x: x,
-					y:y
-				}
-			}
-		}
-	}
+  for (let x in board) {
+    for (let y in board[x]) {
+      if (!board[x][y]) {
+        board[x][y] = {
+          letter: alphabet[random(alphabet.length)],
+          x: x,
+          y: y,
+        };
+      }
+    }
+  }
 }
 
 function drawSpaces() {
@@ -156,6 +192,7 @@ function updateCanvas() {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = "20px Arial";
+        ctx.fillStyle = "black";
         ctx.fillStyle = "black";
 
         let letterObj = board[w][h];
