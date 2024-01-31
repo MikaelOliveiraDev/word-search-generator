@@ -1,10 +1,15 @@
 "user strict";
 
-let buttonGenerate = document.querySelector("#generate");
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let outputDiv = document.querySelector("#output");
+let textarea = document.querySelector("textarea#text")
+let buttonClear = document.querySelector("#clearText")
+let buttonGenerate = document.querySelector("#generate");
 
+buttonClear.addEventListener("click", function() {
+	textarea.value = ""
+})
 buttonGenerate.addEventListener("click", generate);
 
 let board = [];
@@ -32,13 +37,17 @@ function configureBoard() {
 
 function generate() {
   configureBoard();
+  
+  // Get the words from textarea
+  let string = textarea.value.toUpperCase()
+  let words = string.split(/[\s,\.]+/)
+  
+  for (let word of words) putWordOnBoard(word);
+  fillSpaces()
 
-  let arr = ["CASA", "GATO", "TAPETE"];
-  for (let word of arr) putWordOnBoard(word);
-
-  //fillSpaces()
   updateCanvas(board);
 }
+
 function putWordOnBoard(word) {
   let taskFailed;
   let taskAttempts = 0;
