@@ -2,19 +2,34 @@
 
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
-let outputDiv = document.querySelector("#output");
-let textarea = document.querySelector("textarea#text")
-let buttonClear = document.querySelector("#clearText")
-let buttonGenerate = document.querySelector("#generate");
 
-buttonClear.addEventListener("click", function() {
-	textarea.value = ""
-})
+// Form
+let outputDiv = document.querySelector("#output");
+let textarea = document.querySelector("textarea#text");
+let buttonClear = document.querySelector("#clearText");
+let buttonGenerate = document.querySelector("#generate");
+let inputWidth = document.querySelector("#width");
+let inputHeight = document.querySelector("#height");
+
+buttonClear.addEventListener("click", function () {
+  textarea.value = "";
+});
 buttonGenerate.addEventListener("click", generate);
+inputWidth.addEventListener("change", updateCanvasDimentions);
+inputHeight.addEventListener("change", updateCanvasDimentions);
+
+function updateCanvasDimentions(ev) {
+  if (ev.target.name == "width") boardWidth = ev.target.value;
+  else boardHeight = ev.target.value;
+
+  board = [];
+  configureBoard();
+  updateCanvas();
+}
 
 let board = [];
-let boardWidth = 10;
-let boardHeight = 10;
+let boardWidth = 15;
+let boardHeight = 15;
 let letterSpace = 30;
 
 function random(to, from) {
@@ -37,13 +52,13 @@ function configureBoard() {
 
 function generate() {
   configureBoard();
-  
+
   // Get the words from textarea
-  let string = textarea.value.toUpperCase()
-  let words = string.split(/[\s,\.]+/)
-  
+  let string = textarea.value.toUpperCase();
+  let words = string.split(/[\s,\.]+/);
+
   for (let word of words) putWordOnBoard(word);
-  fillSpaces()
+  fillSpaces();
 
   updateCanvas(board);
 }
@@ -69,6 +84,19 @@ function putWordOnBoard(word) {
     let positionY;
     let reverse = Boolean(Math.floor(Math.random() * 2));
 
+    // Check if word fits in the board
+    if (positionStyle != "vertical") {
+      if (word.length > boardWidth) {
+        taskFailed = true;
+        continue;
+      }
+    }
+    if (positionStyle != "horizontal") {
+      if (word.length > boardHeight) {
+        taskFailed = true;
+        continue;
+      }
+    }
     // Position horizontally
     if (positionStyle == "vertical") positionX = random(boardWidth);
     else positionX = random(boardWidth - word.length);
@@ -87,7 +115,8 @@ function putWordOnBoard(word) {
       let y = positionY;
 
       if (positionStyle != "vertical") x += i;
-      if (positionStyle != "horizontal" && positionStyle != "diagonal-up") y += i;
+      if (positionStyle != "horizontal" && positionStyle != "diagonal-up")
+        y += i;
       else if (positionStyle == "diagonal-up") y -= i;
 
       // Abort if the word overlap another
@@ -177,7 +206,8 @@ function drawSpaces() {
     let posX = i * letterSpace;
     ctx.moveTo(posX, 0);
     ctx.lineTo(posX, canvas.height);
-
+  }
+  for (let i = 0; i < boardHeight; i++) {
     let posY = i * letterSpace;
     ctx.moveTo(0, posY);
     ctx.lineTo(canvas.width, posY);
@@ -195,6 +225,8 @@ function updateCanvas() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawSpaces();
+
+  // Draw words letters
   for (let w in board) {
     for (let h in board[w]) {
       if (board[w][h]) {
